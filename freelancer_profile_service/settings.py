@@ -2,18 +2,24 @@
 Django settings for freelancer_profile_service project.
 """
 
+import pymysql
+pymysql.version_info = (2, 2, 1, "final", 0)
+pymysql.__version__ = "2.2.1"
+pymysql.install_as_MySQLdb()
+
 from pathlib import Path
-from datetime import timedelta
 import os
 from dotenv import load_dotenv
+
 
 # --------------------------------------------------
 # BASE DIRECTORY
 # --------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load .env from project root (same level as manage.py)
+# Load .env
 load_dotenv(BASE_DIR / ".env")
+
 
 # --------------------------------------------------
 # SECURITY
@@ -23,6 +29,7 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
+
 
 # --------------------------------------------------
 # APPLICATIONS
@@ -43,6 +50,7 @@ INSTALLED_APPS = [
     "profiles",
 ]
 
+
 # --------------------------------------------------
 # MIDDLEWARE
 # --------------------------------------------------
@@ -56,12 +64,14 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
 # --------------------------------------------------
 # URLS & WSGI
 # --------------------------------------------------
 ROOT_URLCONF = "freelancer_profile_service.urls"
 
 WSGI_APPLICATION = "freelancer_profile_service.wsgi.application"
+
 
 # --------------------------------------------------
 # TEMPLATES
@@ -82,66 +92,98 @@ TEMPLATES = [
     },
 ]
 
+
 # --------------------------------------------------
 # DATABASE
 # --------------------------------------------------
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": os.getenv("DB_NAME"),
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT"),
     }
 }
+
 
 # --------------------------------------------------
 # PASSWORD VALIDATORS
 # --------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
+    },
 ]
+
 
 # --------------------------------------------------
 # INTERNATIONALIZATION
 # --------------------------------------------------
 LANGUAGE_CODE = "en-us"
+
 TIME_ZONE = "UTC"
+
 USE_I18N = True
+
 USE_TZ = True
+
 
 # --------------------------------------------------
 # STATIC & MEDIA
 # --------------------------------------------------
 STATIC_URL = "/static/"
 
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 MEDIA_URL = "/media/"
+
 MEDIA_ROOT = BASE_DIR / "media"
 
+
 # --------------------------------------------------
-# DEFAULT PK
+# DEFAULT PRIMARY KEY
 # --------------------------------------------------
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
 
 # --------------------------------------------------
 # DJANGO REST FRAMEWORK
 # --------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_PERMISSION_CLASSES": (
-        "rest_framework.permissions.IsAuthenticated",
+        "profiles.authentication.CustomJWTAuthentication",
     ),
 }
 
+
 # --------------------------------------------------
-# SIMPLE JWT (MUST MATCH AUTH SERVICE)
+# JWT PUBLIC KEY
+# --------------------------------------------------
+JWT_PUBLIC_KEY_PATH = os.getenv(
+    "JWT_PUBLIC_KEY_PATH",
+    str(BASE_DIR.parent / "jwt_keys" / "public.pem"),
+)
+
+with open(JWT_PUBLIC_KEY_PATH, encoding="utf-8") as public_key_file:
+    JWT_PUBLIC_KEY = public_key_file.read()
+
+
+# --------------------------------------------------
+# SIMPLE JWT
 # --------------------------------------------------
 SIMPLE_JWT = {
-    "ALGORITHM": os.getenv("JWT_ALGORITHM", "HS256"),
-    "SIGNING_KEY": os.getenv("JWT_SIGNING_KEY", SECRET_KEY),
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ALGORITHM": "RS256",
+    "VERIFYING_KEY": JWT_PUBLIC_KEY,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
