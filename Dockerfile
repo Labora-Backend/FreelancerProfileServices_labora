@@ -2,7 +2,9 @@ FROM python:3.13-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    DJANGO_SERVICE=freelancer_service
+    PYTHONPATH=/opt/labora \
+    JWT_PUBLIC_KEY_PATH=/app/jwt_keys/public.pem \
+    DJANGO_SERVICE=freelancer_profile_service
 
 WORKDIR /app
 
@@ -13,14 +15,16 @@ RUN apt-get update && apt-get install -y \
 
 RUN useradd -m -u 10001 appuser
 
-COPY requirements.txt /tmp/requirements.txt
+COPY labora_shared /opt/labora/labora_shared
+
+COPY FreelancerProfileServices/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r /tmp/requirements.txt
 
-COPY --chown=appuser:appuser . /app/
+COPY FreelancerProfileServices/ /app/
 
 RUN chmod +x /app/entrypoint.sh && \
-    mkdir -p /app/media && \
+    mkdir -p /app/media /app/jwt_keys && \
     chown -R appuser:appuser /app
 
 USER appuser
