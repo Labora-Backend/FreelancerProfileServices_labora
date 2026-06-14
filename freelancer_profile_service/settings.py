@@ -50,7 +50,9 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
-
+SERVICE_API_KEY = os.getenv(
+    "SERVICE_API_KEY"
+)
 # --------------------------------------------------
 # APPLICATIONS
 # --------------------------------------------------
