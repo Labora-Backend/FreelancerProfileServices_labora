@@ -1,9 +1,4 @@
 from django.db import models
-class Skill(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-
-    def __str__(self):
-        return self.name
 
 
 class FreelancerProfile(models.Model):
@@ -24,7 +19,7 @@ class FreelancerProfile(models.Model):
     experience_years = models.PositiveIntegerField(default=0)
     hourly_rate = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=10, default="INR")
-    skills = models.ManyToManyField(Skill,related_name="freelancers",blank=True)
+  
 
     availability = models.CharField(
         max_length=20,
