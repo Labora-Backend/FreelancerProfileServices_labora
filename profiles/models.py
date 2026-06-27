@@ -45,6 +45,9 @@ class FreelancerProfile(models.Model):
         decimal_places=2,
         default=0.0
     )
+    total_reviews = models.PositiveIntegerField(
+        default=0
+    )
 
     # Status
     is_verified = models.BooleanField(default=False)

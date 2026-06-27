@@ -15,3 +15,16 @@ class FreelancerProfileViewSerializer(serializers.ModelSerializer):
         #     "total_jobs_completed",
         #     "average_rating",
         # )
+
+class InternalFreelancerListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FreelancerProfile
+        fields = [
+            "user_id",
+            "full_name",
+            "title",
+            "hourly_rate",
+            "profile_image",
+            "created_at",
+        ]

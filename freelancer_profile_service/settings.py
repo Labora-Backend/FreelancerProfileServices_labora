@@ -50,6 +50,10 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "unsafe-dev-secret-key")
 DEBUG = os.getenv("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = ["*"]
+SKILL_SERVICE_URL = os.getenv(
+    "SKILL_SERVICE_URL"
+)
+
 SERVICE_API_KEY = os.getenv(
     "SERVICE_API_KEY"
 )
@@ -174,3 +178,17 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+# --------------------------------------------------
+# SERVICE URLs
+# --------------------------------------------------
+AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL")
+CLIENT_PROFILE_SERVICE_URL = os.getenv("CLIENT_PROFILE_SERVICE_URL")
+FREELANCER_PROFILE_SERVICE_URL = os.getenv("FREELANCER_PROFILE_SERVICE_URL")
+MESSAGE_SERVICE_URL = os.getenv("MESSAGE_SERVICE_URL")
+JOB_SERVICE_URL = os.getenv("JOB_SERVICE_URL")
+SKILL_SERVICE_URL = os.getenv("SKILL_SERVICE_URL")
+APPLICATION_SERVICE_URL = os.getenv("APPLICATION_SERVICE_URL")
+PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL")
+REVIEW_SERVICE_URL = os.getenv("REVIEW_SERVICE_URL")
+NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL")

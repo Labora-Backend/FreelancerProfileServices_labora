@@ -1,15 +1,17 @@
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.views import APIView
 
-from .permissions import IsFreelancer
-from .serializers import FreelancerProfileViewSerializer
+from .role_permissions import IsFreelancer
+from .serializers import FreelancerProfileViewSerializer, InternalFreelancerListSerializer
 from .models import FreelancerProfile
-
+from rest_framework.decorators import authentication_classes
 import requests
 from django.conf import settings
-
+from .permissions.internal_service import IsInternalService
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, IsFreelancer])
@@ -110,8 +112,10 @@ def freelancer_profile_view(request):
     # Fetch skills from Skill Service
     try:
 
+        url = f"{settings.SKILL_SERVICE_URL}/api/internal/users/{request.user.id}/skills/"
+
         response = requests.get(
-            f"{settings.SKILL_SERVICE_URL}/internal/users/{request.user.id}/skills/",
+            url,
             headers={
                 "X-Service-Key": settings.SERVICE_API_KEY
             },
@@ -155,4 +159,71 @@ def freelancer_profile_delete(request):
             "message": "Profile deleted successfully"
         },
         status=status.HTTP_200_OK
-    )   
+    )
+
+@api_view(["PATCH"])
+
+@authentication_classes([])
+@permission_classes([IsInternalService])
+def update_freelancer_rating(request, user_id):
+
+    try:
+        profile = FreelancerProfile.objects.get(
+            user_id=user_id
+        )
+
+    except FreelancerProfile.DoesNotExist:
+        return Response(
+            {
+                "error": "Freelancer profile not found"
+            },
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+    average_rating = request.data.get(
+        "average_rating"
+    )
+
+    total_reviews = request.data.get(
+        "total_reviews"
+    )
+
+    if average_rating is not None:
+        profile.average_rating = average_rating
+
+    if total_reviews is not None:
+        profile.total_reviews = total_reviews
+
+    profile.save()
+
+    return Response(
+        {
+            "message": "Rating updated successfully"
+        },
+        status=status.HTTP_200_OK
+    )
+
+class InternalFreelancerListView(APIView):
+    authentication_classes = []
+    permission_classes = [IsInternalService]
+
+    def get(self, request):
+
+        freelancers = FreelancerProfile.objects.all().order_by("-created_at")
+
+        paginator = PageNumberPagination()
+        paginator.page_size = 20
+
+        page = paginator.paginate_queryset(
+            freelancers,
+            request
+        )
+
+        serializer = InternalFreelancerListSerializer(
+            page,
+            many=True
+        )
+
+        return paginator.get_paginated_response(
+            serializer.data
+        )
